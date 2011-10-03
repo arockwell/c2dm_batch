@@ -1,0 +1,4 @@
+test:
+  email: test@example.com
+  password: abc123
+  source: your_name
