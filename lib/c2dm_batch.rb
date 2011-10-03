@@ -5,5 +5,5 @@ Bundler.require(:default)
 
 $:.unshift File.dirname(__FILE__)
 
-module GemTemplate
+module C2dmBatch
 end

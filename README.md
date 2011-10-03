@@ -1,4 +1,4 @@
-GemTemplate
+C2dmBatch
 ===========
 
 A gem template for new projects.
@@ -16,8 +16,8 @@ Setup the template
 You only have to do this once.
 
 <pre>
-git clone git@github.com:winton/gem_template.git
-cd gem_template
+git clone git@github.com:winton/c2dm_batch.git
+cd c2dm_batch
 stencil
 </pre>
 
@@ -29,7 +29,7 @@ Do this for every new project.
 <pre>
 mkdir my_project
 git init
-stencil gem_template
+stencil c2dm_batch
 rake rename
 </pre>
 
