@@ -8,6 +8,8 @@ module C2dmBatch
       @email = email
       @password = password
       @source = source
+
+      @hydra = Typhoeus::Hydra.new
     end
 
     def authenticate!
@@ -26,10 +28,8 @@ module C2dmBatch
       }
       request.headers = headers
 
-      # Run the request via Hydra.
-      hydra = Typhoeus::Hydra.new
-      hydra.queue(request)
-      hydra.run
+      @hydra.queue(request)
+      @hydra.run
       response = request.response
 
       auth_token = ""
@@ -55,10 +55,8 @@ module C2dmBatch
       }
       request.headers = headers
 
-      # Run the request via Hydra.
-      hydra = Typhoeus::Hydra.new
-      hydra.queue(request)
-      hydra.run
+      @hydra.queue(request)
+      @hydra.run
       response = request.response
     end
 
