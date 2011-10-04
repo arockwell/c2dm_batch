@@ -17,7 +17,6 @@ describe C2dmBatch::Sender do
 
   it "should send a notifcation" do
     sender = C2dmBatch::Sender.new(@email, @password, @source)
-    sender.authenticate!
     notification = {
       :registration_id => @reg_id,
       :data => { 

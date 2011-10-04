@@ -10,6 +10,7 @@ module C2dmBatch
       @source = source
 
       @hydra = Typhoeus::Hydra.new
+      authenticate!
     end
 
     def authenticate!
