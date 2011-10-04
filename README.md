@@ -23,6 +23,7 @@ notification = {
     }
 }
 sender.send_notification(notification)
+</pre>
 
 Send notifications in batch
 -----------------------------
@@ -54,8 +55,10 @@ Customizing after_success and after_max_retry behavior
 
 To customize the behavior of success and failure, a lambda can be provided. This is useful for firing events your application (e.g., logging, deleting bad registration_ids, etc.)
 
+<pre>
 sender = C2dmBatch::Sender.new(email, password, source)
 sender.after_notification_success(lambda |notification| { Logger.info "Successfully sent to: #{notification.registration_id}" })
 sender.after_max_retry(lambda |notification| { Logger.error "Failed to send to: #{notification.registration}" })
+</pre>
 
 By default, these methods to do not have any behavior.
