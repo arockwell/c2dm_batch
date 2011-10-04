@@ -19,25 +19,19 @@ module C2dmBatch
         'Passwd'      => @password,
         'source'      => @source,
       }
-
-      post_body = []
-      auth_options.each_pair do |k,v|
-        post_body << "#{k}=#{CGI::escape(v.to_s)}"
-      end
-      post_body = post_body.join('&')
+      request.body = build_post_body(auth_options)
 
       headers = {
-        'Content-type'   => 'application/x-www-form-urlencoded',
-        'Content-length' => post_body.length.to_s
+        'Content-length' => request.body.length.to_s
       }
       request.headers = headers
-      request.body = post_body
 
       # Run the request via Hydra.
       hydra = Typhoeus::Hydra.new
       hydra.queue(request)
       hydra.run
       response = request.response
+
       auth_token = ""
       if response.success?
         response.body.split("\n").each do |line|
@@ -50,36 +44,39 @@ module C2dmBatch
     end
 
     def send_notification(notification)
+      request = Typhoeus::Request.new(SEND_URL)
       notification[:collapse_key] = 'collapse'
-      post_body = []
-      notification.each_pair do |k,v|
-        post_body << "#{k}=#{CGI::escape(v.to_s)}"
-      end
-     
-      # data attributes need a key in the form of "data.key"...
-      data_attributes = notification.delete(:data)
-      data_attributes.each_pair do |k,v|
-        post_body << "data.#{k}=#{CGI::escape(v.to_s)}"
-      end if data_attributes
-      post_body = post_body.join('&')
-      puts post_body
+      request.body = build_post_body(notification)
 
       headers = {
         'Authorization'  => "GoogleLogin auth=#{@auth_token}",
         'Content-type'   => 'application/x-www-form-urlencoded',
-        'Content-length' => post_body.length.to_s
+        'Content-length' => request.body.length.to_s
       }
-
-      request = Typhoeus::Request.new(SEND_URL)
       request.headers = headers
-      request.body = post_body
-      pp request
+
       # Run the request via Hydra.
       hydra = Typhoeus::Hydra.new
       hydra.queue(request)
       hydra.run
       response = request.response
-      pp response
+    end
+
+  private
+    def build_post_body(options={})
+      post_body = []
+
+      # data attributes need a key in the form of "data.key"...
+      data_attributes = options.delete(:data)
+      data_attributes.each_pair do |k,v|
+        post_body << "data.#{k}=#{CGI::escape(v.to_s)}"
+      end if data_attributes
+
+      options.each_pair do |k,v|
+        post_body << "#{k}=#{CGI::escape(v.to_s)}"
+      end
+
+      post_body.join('&')
     end
   end
 
