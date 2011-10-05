@@ -45,16 +45,7 @@ module C2dmBatch
     end
 
     def send_notification(notification)
-      request = Typhoeus::Request.new(SEND_URL)
-      notification[:collapse_key] = 'collapse'
-      request.body = build_post_body(notification)
-
-      headers = {
-        'Authorization'  => "GoogleLogin auth=#{@auth_token}",
-        'Content-type'   => 'application/x-www-form-urlencoded',
-        'Content-length' => request.body.length.to_s
-      }
-      request.headers = headers
+      request = create_notification_request(notification)
 
       @hydra.queue(request)
       @hydra.run
@@ -76,6 +67,20 @@ module C2dmBatch
       end
 
       post_body.join('&')
+    end
+
+    def create_notification_request(notification)
+      request = Typhoeus::Request.new(SEND_URL)
+      notification[:collapse_key] = 'collapse'
+      request.body = build_post_body(notification)
+
+      headers = {
+        'Authorization'  => "GoogleLogin auth=#{@auth_token}",
+        'Content-type'   => 'application/x-www-form-urlencoded',
+        'Content-length' => request.body.length.to_s
+      }
+      request.headers = headers
+      request
     end
   end
 
