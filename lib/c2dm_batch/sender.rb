@@ -54,17 +54,22 @@ module C2dmBatch
 
     def send_batch_notifications(notifications)
       requests = []
+      errors = []
       notifications.each do |notification|
         request = create_notification_request(notification)
         requests << request
         request.method = :post
-        pp request
+        request.on_complete do |response|
+          if response.success?
+            if response.body =~ /Error=(\w+)/
+              errors << { :registration_id => notification[:registration_id], :error => $1 }
+            end
+          end
+        end
         @hydra.queue(request)
       end
       @hydra.run
-      requests.each do |request|
-        pp request.response
-      end
+      errors
     end
 
   private
@@ -83,7 +88,7 @@ module C2dmBatch
 
       post_body.join('&')
     end
-
+    
     def create_notification_request(notification)
       request = Typhoeus::Request.new(SEND_URL)
       notification[:collapse_key] = 'collapse'

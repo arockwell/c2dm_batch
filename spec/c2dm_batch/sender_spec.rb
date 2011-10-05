@@ -27,7 +27,30 @@ describe C2dmBatch::Sender do
     teams.each do |team|
       notifications << create_notification(@reg_id, team)
     end
-    sender.send_batch_notifications(notifications)
+    errors = sender.send_batch_notifications(notifications)
+    errors.size.should == 0
+  end
+
+  it "should return InvalidRegistration and registration_id" do
+    sender = C2dmBatch::Sender.new(@email, @password, @source)
+    teams = [ "buffalo-bills", "miami-dolphins"]
+    notifications = []
+    bad_reg_id = "bad_reg_id"
+    notifications << create_notification(bad_reg_id, teams[0])
+    notifications << create_notification(@reg_id, teams[1])
+    errors = sender.send_batch_notifications(notifications)
+    errors.size.should == 1
+    errors[0][:registration_id].should == bad_reg_id
+    errors[0][:error].should == "InvalidRegistration"
+  end
+
+  it "should return MessageToBig status code" do
+    sender = C2dmBatch::Sender.new(@email, @password, @source)
+    notifications = []
+    notifications << create_notification(@reg_id, "1" * 1025)
+    errors = sender.send_batch_notifications(notifications)
+    errors[0][:registration_id].should == @reg_id
+    errors[0][:error].should == "MessageTooBig"
   end
 
   private
