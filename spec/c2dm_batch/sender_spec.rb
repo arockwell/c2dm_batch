@@ -17,48 +17,30 @@ describe C2dmBatch::Sender do
 
   it "should send a notifcation" do
     sender = C2dmBatch::Sender.new(@email, @password, @source)
-    notification = {
-      :registration_id => @reg_id,
-      :data => { 
-        :alert => "1 NFL Players Who Won't Replicate Last Year's Success",
-        :url => "/articles/816975-nfl-5-players-who-wont-replicate-last-years-success",
-        :tag => "boston-college-football"
-      }
-    }
-    sender.send_notification(notification)
+    sender.send_notification(create_notification(@reg_id, "boston-college-football"))
   end
 
   it "should send notifications in batches" do
     sender = C2dmBatch::Sender.new(@email, @password, @source)
-    notifications = [
-      {
-        :registration_id => @reg_id,
-        :collapse_key => "1",
-        :data => { 
-          :alert => "2 NFL Players Who Won't Replicate Last Year's Success",
-          :url => "/articles/816975-nfl-5-players-who-wont-replicate-last-years-success",
-          :tag => "buffalo-bills"
-        }
-      },
-      {
-        :registration_id => @reg_id,
-        :collapse_key => "2",
-        :data => { 
-          :alert => "3 NFL Players Who Won't Replicate Last Year's Success",
-          :url => "/articles/816975-nfl-5-players-who-wont-replicate-last-years-success",
-          :tag => "miami-dolphins"
-        }
-      },
-      {
-        :registration_id => @reg_id,
-        :collapse_key => "3",
-        :data => { 
-          :alert => "4 NFL Players Who Won't Replicate Last Year's Success",
-          :url => "/articles/816975-nfl-5-players-who-wont-replicate-last-years-success",
-          :tag => "new-york-jets"
-        }
-      }
-    ]
+    teams = [ "buffalo-bills", "miami-dolphins", "new-york-jets"]
+    notifications = []
+    teams.each do |team|
+      notifications << create_notification(@reg_id, team)
+    end
     sender.send_batch_notifications(notifications)
   end
+
+  private
+  def create_notification(reg_id, team)
+      {
+        :registration_id => reg_id,
+        :collapse_key => "#{1 + rand(100000)}",
+        :data => { 
+          :alert => team,
+          :url => "/articles/816975-nfl-5-players-who-wont-replicate-last-years-success",
+          :tag => team
+        }
+      }
+  end
+
 end
