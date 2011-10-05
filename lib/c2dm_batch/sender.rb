@@ -52,6 +52,21 @@ module C2dmBatch
       response = request.response
     end
 
+    def send_batch_notifications(notifications)
+      requests = []
+      notifications.each do |notification|
+        request = create_notification_request(notification)
+        requests << request
+        request.method = :post
+        pp request
+        @hydra.queue(request)
+      end
+      @hydra.run
+      requests.each do |request|
+        pp request.response
+      end
+    end
+
   private
     def build_post_body(options={})
       post_body = []
