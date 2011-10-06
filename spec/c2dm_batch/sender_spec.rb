@@ -53,6 +53,22 @@ describe C2dmBatch::Sender do
     errors[0][:error].should == "MessageTooBig"
   end
 
+  it "should abort on 503 and return remaining requests" do
+    hydra = Typhoeus::Hydra.new
+    response = Typhoeus::Response.new(:code => 503, :headers => "", :body => "registration=123")
+    hydra.stub(:post, 'https://android.apis.google.com/c2dm/send').and_return(response)
+    sender = C2dmBatch::Sender.new(@email, @password, @source)
+    sender.instance_variable_set("@hydra", hydra)
+    teams = [ "buffalo-bills", "miami-dolphins", "new-york-jets"]
+    notifications = []
+    teams.each do |team|
+      notifications << create_notification(@reg_id, team)
+    end
+    errors = sender.send_batch_notifications(notifications)
+    errors.size.should == 3
+    errors[0][:error].should == 503
+  end
+  
   private
   def create_notification(reg_id, team)
       {

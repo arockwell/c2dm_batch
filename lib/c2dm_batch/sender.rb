@@ -63,12 +63,26 @@ module C2dmBatch
           if response.success?
             if response.body =~ /Error=(\w+)/
               errors << { :registration_id => notification[:registration_id], :error => $1 }
+            else
+              requests.delete(request)
             end
+          elsif response.code == 503
+            @hydra.abort
+            raise RuntimeError
           end
         end
         @hydra.queue(request)
       end
-      @hydra.run
+      begin 
+        @hydra.run
+      rescue RuntimeError
+        requests.each do |failed_request|
+          errors << { 
+            :registration_id => failed_request.body.match(/registration_id=(\w+)/)[1], 
+            :error => 503 
+          }
+        end
+      end
       errors
     end
 
