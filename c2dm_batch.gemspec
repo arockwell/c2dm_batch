@@ -8,11 +8,11 @@ Gem::Specification.new do |s|
   s.name        = "c2dm_batch"
   s.version     = '0.1.0'
   s.platform    = Gem::Platform::RUBY
-  s.authors     = []
-  s.email       = []
-  s.homepage    = "http://"
-  s.summary     = %q{}
-  s.description = %q{}
+  s.authors     = ["Alex Rockwell"]
+  s.email       = ["arockwell@gmail.com"]
+  s.homepage    = "http://alexrockwell.org"
+  s.summary     = %q{Gem to send android c2dm notifications in batch}
+  s.description = %q{Gem to send android c2dm notifications in batch}
 
   s.executables = `cd #{root} && git ls-files bin/*`.split("\n").collect { |f| File.basename(f) }
   s.files = `cd #{root} && git ls-files`.split("\n")
