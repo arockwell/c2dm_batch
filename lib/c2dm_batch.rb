@@ -1,7 +1,7 @@
 require "rubygems"
-require "bundler"
 require "yaml"
 require "cgi"
+gem 'typhoeus', '= 0.2.4'
 require "typhoeus"
 
 $:.unshift File.dirname(__FILE__)
