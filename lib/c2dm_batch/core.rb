@@ -7,9 +7,10 @@ module C2dmBatch
   @source = nil
 
   @hydra = Typhoeus::Hydra.new
+  @logger = Logger.new(STDOUT)
 
   class << self
-    attr_accessor :auth_url, :send_url, :email, :password, :source
+    attr_accessor :auth_url, :send_url, :email, :password, :source, :logger
   end
 
   def self.authenticate!
@@ -64,7 +65,9 @@ module C2dmBatch
         if response.success?
           if response.body =~ /Error=(\w+)/
             errors << { :registration_id => notification[:registration_id], :error => $1 }
+            @logger.info("Error sending: #{pp notification}")
           else
+            @logger.info("Sent notification: #{pp notification}")
             requests.delete(request)
           end
         elsif response.code == 503
