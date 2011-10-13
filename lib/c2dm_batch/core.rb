@@ -65,9 +65,9 @@ module C2dmBatch
         if response.success?
           if response.body =~ /Error=(\w+)/
             errors << { :registration_id => notification[:registration_id], :error => $1 }
-            @logger.info("Error sending: #{pp notification}")
+            @logger.info("Error sending: #{notification[:registration_id]}")
           else
-            @logger.info("Sent notification: #{pp notification}")
+            @logger.info("Sent notification: #{notification[:registration_id]}")
             requests.delete(request)
           end
         elsif response.code == 503
