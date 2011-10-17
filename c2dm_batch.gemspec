@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec", "~> 1.0"
   s.add_dependency "typhoeus", "= 0.2.4"
+  s.add_dependency "json", "~> 1.4.3"
 end

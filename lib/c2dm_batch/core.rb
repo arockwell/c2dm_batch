@@ -65,9 +65,9 @@ module C2dmBatch
         if response.success?
           if response.body =~ /Error=(\w+)/
             errors << { :registration_id => notification[:registration_id], :error => $1 }
-            @logger.info("Error sending: #{notification[:registration_id]}")
+            @logger.info("Error sending: #{notification.to_json}")
           else
-            @logger.info("Sent notification: #{notification[:registration_id]}")
+            @logger.info("Sent notification: #{notification.to_json}")
             requests.delete(request)
           end
         elsif response.code == 503
@@ -103,6 +103,7 @@ module C2dmBatch
     options.each_pair do |k,v|
       post_body << "#{k}=#{CGI::escape(v.to_s)}"
     end
+    options.merge! data_attributes if data_attributes
 
     post_body.join('&')
   end

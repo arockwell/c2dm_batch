@@ -12,6 +12,13 @@ Requirements
 gem install typhoeus
 </pre>
 
+Configuration
+-------------
+C2dmBatch.email = 'your_c2dm_sender@gmail.com' 
+C2dmBatch.password = 'password'
+C2dmBatch.source = 'your app name'
+C2dmBatch.logger = Logger.new(STDOUT) # default logger 
+
 Send a single notification
 --------------------------
 <pre>
