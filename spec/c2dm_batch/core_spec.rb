@@ -3,19 +3,20 @@ require 'spec_helper'
 describe C2dmBatch do
   before do
     @config = YAML::load(File.open("config.yml"))
-    C2dmBatch.email = @config['server']['username']
-    C2dmBatch.password = @config['server']['password']
-    C2dmBatch.source = @config['server']['source']
+    @c2dm_batch = C2dmBatch.new
+    @c2dm_batch.email = @config['server']['username']
+    @c2dm_batch.password = @config['server']['password']
+    @c2dm_batch.source = @config['server']['source']
     @reg_id = @config['client']['registration_id']
   end
 
   it "should give an auth token" do
-    auth_code = C2dmBatch.authenticate!
+    auth_code = @c2dm_batch.authenticate!
     auth_code.should_not eql("")
   end
 
   it "should send a notifcation" do
-    C2dmBatch.send_notification(create_notification(@reg_id, "boston-college-football"))
+    @c2dm_batch.send_notification(create_notification(@reg_id, "boston-college-football"))
   end
 
   it "should send notifications in batches" do
@@ -24,7 +25,7 @@ describe C2dmBatch do
     teams.each do |team|
       notifications << create_notification(@reg_id, team)
     end
-    errors = C2dmBatch.send_batch_notifications(notifications)
+    errors = @c2dm_batch.send_batch_notifications(notifications)
     errors.size.should == 0
   end
 
@@ -34,7 +35,7 @@ describe C2dmBatch do
     bad_reg_id = "bad_reg_id"
     notifications << create_notification(bad_reg_id, teams[0])
     notifications << create_notification(@reg_id, teams[1])
-    errors = C2dmBatch.send_batch_notifications(notifications)
+    errors = @c2dm_batch.send_batch_notifications(notifications)
     errors.size.should == 1
     errors[0][:registration_id].should == bad_reg_id
     errors[0][:error].should == "InvalidRegistration"
@@ -43,7 +44,7 @@ describe C2dmBatch do
   it "should return MessageToBig status code" do
     notifications = []
     notifications << create_notification(@reg_id, "1" * 1025)
-    errors = C2dmBatch.send_batch_notifications(notifications)
+    errors = @c2dm_batch.send_batch_notifications(notifications)
     errors[0][:registration_id].should == @reg_id
     errors[0][:error].should == "MessageTooBig"
   end
@@ -52,13 +53,13 @@ describe C2dmBatch do
     hydra = Typhoeus::Hydra.new
     response = Typhoeus::Response.new(:code => 503, :headers => "", :body => "registration=123")
     hydra.stub(:post, 'https://android.apis.google.com/c2dm/send').and_return(response)
-    C2dmBatch.instance_variable_set("@hydra", hydra)
+    @c2dm_batch.instance_variable_set("@hydra", hydra)
     teams = [ "buffalo-bills", "miami-dolphins", "new-york-jets"]
     notifications = []
     teams.each do |team|
       notifications << create_notification(@reg_id, team)
     end
-    errors = C2dmBatch.send_batch_notifications(notifications)
+    errors = @c2dm_batch.send_batch_notifications(notifications)
     errors.size.should == 3
     errors[0][:error].should == 503
   end

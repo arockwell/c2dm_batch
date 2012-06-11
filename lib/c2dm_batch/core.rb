@@ -1,19 +1,14 @@
-module C2dmBatch
-  @auth_url = 'https://www.google.com/accounts/ClientLogin'
-  @send_url = 'https://android.apis.google.com/c2dm/send'
-
-  @email = nil
-  @password = nil 
-  @source = nil
-
-  @hydra = Typhoeus::Hydra.new
-  @logger = Logger.new(STDOUT)
-
-  class << self
-    attr_accessor :auth_url, :send_url, :email, :password, :source, :logger
+class C2dmBatch
+  attr_accessor :auth_url, :send_url, :email, :password, :source, :logger
+  
+  def initialize
+    @auth_url = 'https://www.google.com/accounts/ClientLogin'
+    @send_url = 'https://android.apis.google.com/c2dm/send'
+    @hydra = Typhoeus::Hydra.new
+    @logger = Logger.new(STDOUT)
   end
 
-  def self.authenticate!
+  def authenticate!
     request = Typhoeus::Request.new(@auth_url)
     auth_options = {
       'accountType' => 'HOSTED_OR_GOOGLE',
@@ -44,7 +39,7 @@ module C2dmBatch
     @auth_token = auth_token
   end
 
-  def self.send_notification(notification)
+  def send_notification(notification)
     authenticate!
     request = create_notification_request(notification)
 
@@ -53,7 +48,7 @@ module C2dmBatch
     response = request.response
   end
 
-  def self.send_batch_notifications(notifications)
+  def send_batch_notifications(notifications)
     authenticate!
     requests = []
     errors = []
@@ -65,6 +60,7 @@ module C2dmBatch
         if response.success?
           if response.body =~ /Error=(\w+)/
             errors << { :registration_id => notification[:registration_id], :error => $1 }
+            @logger.error("Error received: #{response.body}")
             @logger.info("Error sending: #{notification.to_json}")
           else
             @logger.info("Sent notification: #{notification.to_json}")
@@ -91,7 +87,7 @@ module C2dmBatch
   end
 
   private
-  def self.build_post_body(options={})
+  def build_post_body(options={})
     post_body = []
 
     # data attributes need a key in the form of "data.key"...
@@ -108,7 +104,7 @@ module C2dmBatch
     post_body.join('&')
   end
 
-  def self.create_notification_request(notification)
+  def create_notification_request(notification)
     request = Typhoeus::Request.new(@send_url)
     notification[:collapse_key] = 'collapse'
     request.body = build_post_body(notification)

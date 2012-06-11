@@ -14,33 +14,34 @@ gem install typhoeus
 
 Configuration
 -------------
-C2dmBatch.email = 'your_c2dm_sender@gmail.com' 
-C2dmBatch.password = 'password'
-C2dmBatch.source = 'your app name'
-C2dmBatch.logger = Logger.new(STDOUT) # default logger 
+c2dm_batch = C2dmBatch.new
+@c2dm_batch.email = 'your_c2dm_sender@gmail.com' 
+@c2dm_batch.password = 'password'
+@c2dm_batch.source = 'your app name'
+@c2dm_batch.logger = Logger.new(STDOUT) # default logger 
 
 Send a single notification
 --------------------------
 <pre>
-C2dmBatch.email = 'your_c2dm_sender@gmail.com' 
-C2dmBatch.password = 'password'
-C2dmBatch.source = 'your app name'
+@c2dm_batch.email = 'your_c2dm_sender@gmail.com' 
+@c2dm_batch.password = 'password'
+@c2dm_batch.source = 'your app name'
 notification = {
   :registration_id => "your_reg_id",
     :data => { 
       :test => "test"
     }
 }
-C2dmBatch.send_notification(notification)
+@c2dm_batch.send_notification(notification)
 </pre>
 
 Send notifications in batch
 -----------------------------
 
 <pre>
-C2dmBatch.email = 'your_c2dm_sender@gmail.com' 
-C2dmBatch.password = 'password'
-C2dmBatch.source = 'your app name'
+@c2dm_batch.email = 'your_c2dm_sender@gmail.com' 
+@c2dm_batch.password = 'password'
+@c2dm_batch.source = 'your app name'
 notification = [
   {
     :registration_id => "your_reg_id",
@@ -55,7 +56,7 @@ notification = [
       }
   }
 ]
-errors = C2dmBatch.send_batch_notification(notification)
+errors = @c2dm_batch.send_batch_notification(notification)
 </pre>
 
 Using Typhoeus, the send_batch_notification will parallelize the request in up to 200 parallel requests. Once a request finishes, a new request will automatically get send out. The return value is an array of hashes. The hash is of the form { :registration_id => 'reg_id', :error => 'error_code' }
