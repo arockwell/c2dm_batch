@@ -9,7 +9,7 @@ class C2dmBatch
   end
 
   def authenticate!
-    request = Typhoeus::Request.new(@auth_url)
+    request_options = {}
     auth_options = {
       'accountType' => 'HOSTED_OR_GOOGLE',
       'service'     => 'ac2dm',
@@ -17,12 +17,14 @@ class C2dmBatch
       'Passwd'      => @password,
       'source'      => @source,
     }
-    request.body = build_post_body(auth_options)
+    request_options[:body] = build_post_body(auth_options)
 
     headers = {
-      'Content-length' => request.body.length.to_s
+      'Content-length' => request_options[:body].length.to_s
     }
-    request.headers = headers
+    request_options[:headers] = headers
+    request_options[:method] = :post
+    request = Typhoeus::Request.new(@auth_url, request_options)
 
     @hydra.queue(request)
     @hydra.run
@@ -55,7 +57,6 @@ class C2dmBatch
     notifications.each do |notification|
       request = create_notification_request(notification)
       requests << request
-      request.method = :post
       request.on_complete do |response|
         if response.success?
           if response.body =~ /Error=(\w+)/
@@ -78,7 +79,7 @@ class C2dmBatch
     rescue RuntimeError
       requests.each do |failed_request|
         errors << { 
-          :registration_id => failed_request.body.match(/registration_id=(\w+)/)[1], 
+          :registration_id => failed_request.options[:body].match(/registration_id=(\w+)/)[1],
           :error => 503 
         }
       end
@@ -105,16 +106,17 @@ class C2dmBatch
   end
 
   def create_notification_request(notification)
-    request = Typhoeus::Request.new(@send_url)
+    request_options = {}
     notification[:collapse_key] = 'collapse'
-    request.body = build_post_body(notification)
+    request_options[:body] = build_post_body(notification)
 
     headers = {
       'Authorization'  => "GoogleLogin auth=#{@auth_token}",
       'Content-type'   => 'application/x-www-form-urlencoded',
-        'Content-length' => request.body.length.to_s
+        'Content-length' => request_options[:body].length.to_s
     }
-    request.headers = headers
-    request
+    request_options[:headers] = headers
+    request_options[:method] = :post
+    Typhoeus::Request.new(@send_url, request_options)
   end
 end
