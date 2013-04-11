@@ -43,8 +43,9 @@ describe C2dmBatch do
 
   it "should return MessageToBig status code" do
     notifications = []
-    notifications << create_notification(@reg_id, "1" * 1025)
+    notifications << create_notification(@reg_id, "1" * 2048)
     errors = @c2dm_batch.send_batch_notifications(notifications)
+    errors.size.should == 1
     errors[0][:registration_id].should == @reg_id
     errors[0][:error].should == "MessageTooBig"
   end
