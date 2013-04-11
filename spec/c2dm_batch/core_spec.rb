@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe C2dmBatch do
+  after do
+    Typhoeus::Expectation.clear
+  end
+
   before do
     @config = YAML::load(File.open("config.yml"))
     @c2dm_batch = C2dmBatch.new
@@ -43,8 +47,9 @@ describe C2dmBatch do
 
   it "should return MessageToBig status code" do
     notifications = []
-    notifications << create_notification(@reg_id, "1" * 1025)
+    notifications << create_notification(@reg_id, "1" * 2048)
     errors = @c2dm_batch.send_batch_notifications(notifications)
+    errors.size.should == 1
     errors[0][:registration_id].should == @reg_id
     errors[0][:error].should == "MessageTooBig"
   end
@@ -52,7 +57,7 @@ describe C2dmBatch do
   it "should abort on 503 and return remaining requests" do
     hydra = Typhoeus::Hydra.new
     response = Typhoeus::Response.new(:code => 503, :headers => "", :body => "registration=123")
-    hydra.stub(:post, 'https://android.apis.google.com/c2dm/send').and_return(response)
+    Typhoeus.stub('https://android.apis.google.com/c2dm/send').and_return(response)
     @c2dm_batch.instance_variable_set("@hydra", hydra)
     teams = [ "buffalo-bills", "miami-dolphins", "new-york-jets"]
     notifications = []

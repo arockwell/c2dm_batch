@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
   s.test_files = `cd #{root} && git ls-files -- {features,test,spec}/*`.split("\n")
 
-  s.add_development_dependency "rspec", "~> 1.0"
-  s.add_dependency "typhoeus", "= 0.2.4"
-  s.add_dependency "json", "= 1.6.1"
+  s.add_development_dependency "rspec"
+  s.add_dependency "typhoeus"
+  s.add_dependency "json"
 end
